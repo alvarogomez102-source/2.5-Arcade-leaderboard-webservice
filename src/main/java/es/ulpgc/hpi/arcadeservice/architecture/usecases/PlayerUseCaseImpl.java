@@ -29,6 +29,10 @@ public final class PlayerUseCaseImpl implements PlayerUseCase {
 
     @Override
     public Player create(String nickname) {
+        if (nickname != null && repository.findAll().stream()
+                .anyMatch(p -> p.nickname().equals(nickname.trim()))) {
+            throw new IllegalArgumentException("Nickname already exists");
+        }
         var player = PlayerFactory.create(nickname, nextId::getAndIncrement);
         repository.save(player);
         return player;
