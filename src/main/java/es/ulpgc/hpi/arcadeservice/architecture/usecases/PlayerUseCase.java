@@ -11,4 +11,8 @@ public interface PlayerUseCase {
     Optional<Player> findById(long id);
 
     Player create(String nickname);
+
+    Player addScore(long id, int points);
+
+    List<Player> leaderboard(); // <-- feature B
 }

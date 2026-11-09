@@ -5,6 +5,7 @@ import io.javalin.Javalin;
 import io.javalin.http.NotFoundResponse;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public final class PlayerHttpAdapter {
@@ -27,8 +28,22 @@ public final class PlayerHttpAdapter {
                 ctx.header("Location", "/api/players/" + player.id());
                 ctx.json(player);
             });
+            // Feature A: Sumar puntos
+            config.routes.post("/api/players/{id}/scores", ctx -> {
+                long id = Long.parseLong(ctx.pathParam("id"));
+                var request = ctx.bodyAsClass(AddScoreRequest.class);
+                var player = players.addScore(id, request.points());
+                ctx.json(player);
+            });
+            // Feature B: Leaderboard
+            config.routes.get("/api/leaderboard", ctx -> ctx.json(players.leaderboard()));
+
             config.routes.exception(IllegalArgumentException.class, (error, ctx) ->
-                ctx.status(400).json(Map.of("error", error.getMessage())));
+                    ctx.status(400).json(Map.of("error", error.getMessage())));
+            config.routes.exception(NoSuchElementException.class, (error, ctx) ->
+                    ctx.status(404).json(Map.of("error", error.getMessage())));
         });
     }
 }
+
+record AddScoreRequest(int points) {}
